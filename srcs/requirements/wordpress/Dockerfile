@@ -1,15 +1,26 @@
 FROM debian:buster
 
-RUN apt update -y && apt upgrade -y \
-&& apt install -y php7.3 \
-    php-fpm \
-    php-mysql \
-    mariadb-client \
-    wget \
-    curl \
-    bash \
-&& wget https://fr.wordpress.org/wordpress-6.1.1-fr_FR.tar.gz -P /var/www/html \
-&& cd /var/www/html \
-&& tar -xzf wordpress-6.1.1-fr_FR.tar.gz \
-&& rm wordpress-6.1.1-fr_FR.tar.gz
+RUN apt-get update && apt-get -y install \
+wget \
+php \
+php-cgi \
+php-mysql \
+php-fpm \
+php-pdo \
+php-gd php-cli \
+php-mbstring \
+&& rm -rf /var/lib/apt/lists/*
 
+COPY ./conf/www.conf /var/www/html/
+
+RUN mkdir /run/php
+
+COPY ./conf/script.sh /usr/local/bin/script.sh
+RUN chmod a+x /usr/local/bin/script.sh
+ENTRYPOINT ["/usr/local/bin/script.sh"]
+
+WORKDIR /var/www/html/
+
+EXPOSE 9000
+
+CMD ["/usr/sbin/php-fpm7.3", "-F"]

@@ -1,0 +1,66 @@
+# docker-compose.yml
+version: '3.9'
+
+networks:
+  inception:
+
+services:
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb:latest
+    restart : always
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    ports:
+     - "3306:3306"
+    volumes:
+     - mariadb:/var/lib/mysql
+    env_file: .env  
+    networks:
+        - inception
+
+  wordpress:
+    container_name: wordpress
+    image: wordpresss:latest
+    restart : always
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    expose: ["9000"]
+    volumes:
+     - wordpress:/var/www/html/wordpress
+    env_file: .env
+    networks:
+        - inception
+
+  # nginx:
+  #   container_name: nginx
+  #   restart : always
+  #   build:
+  #     context: ./requirements/nginx
+  #     dockerfile: Dockerfile
+  #   ports:
+  #    - "443:443"
+  #   env_file: .env
+  #   networks:
+  #       - inception
+
+volumes:
+
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/rvrignon/data/mariadb
+
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/rvrignon/data/wordpress
