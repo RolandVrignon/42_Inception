@@ -1,22 +1,50 @@
-COMPOSE_PATH = srcs/docker-compose.yml
+COMPOSE_FILE=./srcs/docker-compose.yml
 
-all:
-	sudo docker-compose -f $(COMPOSE_PATH) up --build
+all: run
 
-down:
-	sudo docker-compose -f $(COMPOSE_PATH) down
+run: 
+	@echo "$(GREEN)Building files for volumes ... $(RESET)"
+	@sudo mkdir -p /home/rolexx/data/wordpress
+	@sudo mkdir -p /home/rolexx/data/mariadb
+	@echo "$(GREEN)Building containers ... $(RESET)"
+	@docker-compose -f $(COMPOSE_FILE) up --build
 
-clean:
-	sudo docker-compose -f $(COMPOSE_PATH) down
-	sudo docker system prune -af
+up:
+	@echo "$(GREEN)Building files for volumes ... $(RESET)"
+	@sudo mkdir -p /home/rolexx/data/wordpress
+	@sudo mkdir -p /home/rolexx/data/mariadb
+	@echo "$(GREEN)Building containers in background ... $(RESET)"
+	@docker-compose -f $(COMPOSE_FILE) up -d --build
 
-fclean:
+debug:
+	@echo "$(GREEN)Building files for volumes ... $(RESET)"
+	@sudo mkdir -p /home/rolexx/data/wordpress
+	@sudo mkdir -p /home/rolexx/data/mariadb
+	@echo "$(GREEN)Building containers with log information ... $(RESET)"
+	@docker-compose -f $(COMPOSE_FILE) --verbose up
 
-	make clean
-	sudo rm -rfd /home/rvrignon/data/wordpress
-	sudo rm -rfd /home/rvrignon/data/mariadb
-	mkdir /home/rvrignon/data/mariadb /home/rvrignon/data/wordpress
+list:	
+	@echo "$(PURPLE)Listing all containers ... $(RESET)"
+	 docker ps -a
 
-re:
-	make fclean 
-	make all
+list_volumes:
+	@echo "$(PURPLE)Listing volumes ... $(RESET)"
+	docker volume ls
+
+clean: 	
+	@echo "$(RED)Stopping containers ... $(RESET)"
+	@docker-compose -f $(COMPOSE_FILE) down
+	@-docker stop `docker ps -qa`
+	@-docker rm `docker ps -qa`
+	@echo "$(RED)Deleting all images ... $(RESET)"
+	@-docker rmi -f `docker images -qa`
+	@echo "$(RED)Deleting all volumes ... $(RESET)"
+	@-docker volume rm `docker volume ls -q`
+	@echo "$(RED)Deleting all network ... $(RESET)"
+	@-docker network rm `docker network ls -q`
+	@echo "$(RED)Deleting all data ... $(RESET)"
+	@sudo rm -rf /home/rolexx/data/wordpress
+	@sudo rm -rf /home/rolexx/data/mariadb
+	@echo "$(RED)Deleting all $(RESET)"
+
+.PHONY: run up debug list list_volumes clean

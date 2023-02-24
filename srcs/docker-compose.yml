@@ -25,6 +25,8 @@ services:
     container_name: wordpress
     image: wordpresss:latest
     restart : always
+    depends_on: 
+      - mariadb
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
@@ -35,17 +37,19 @@ services:
     networks:
         - inception
 
-  # nginx:
-  #   container_name: nginx
-  #   restart : always
-  #   build:
-  #     context: ./requirements/nginx
-  #     dockerfile: Dockerfile
-  #   ports:
-  #    - "443:443"
-  #   env_file: .env
-  #   networks:
-  #       - inception
+  nginx:
+    container_name: nginx
+    build: requirements/nginx
+    image: nginx:latest
+    depends_on :
+      - wordpress
+    networks:
+      - inception
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress:/var/www/html/wordpress
+    restart: always
 
 volumes:
 
@@ -55,7 +59,7 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/rvrignon/data/mariadb
+      device: /home/rolexx/data/mariadb
 
   wordpress:
     name: wordpress
@@ -63,4 +67,4 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/rvrignon/data/wordpress
+      device: /home/rolexx/data/wordpress
