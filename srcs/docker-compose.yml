@@ -1,57 +1,58 @@
-# docker-compose.yml
 version: '3.9'
 
 networks:
   inception:
+    driver: bridge
 
 services:
-
   mariadb:
-    container_name: mariadb
-    image: mariadb:latest
-    restart : always
-    build:
-      context: ./requirements/mariadb
-      dockerfile: Dockerfile
+    container_name: "mariadb"
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb:/var/lib/mysql
+    restart: always
     ports:
-     - "3306:3306"
-    volumes:
-     - mariadb:/var/lib/mysql
-    env_file: .env  
-    networks:
-        - inception
-
-  wordpress:
-    container_name: wordpress
-    image: wordpresss:latest
-    restart : always
-    depends_on: 
-      - mariadb
-    build:
-      context: ./requirements/wordpress
-      dockerfile: Dockerfile
-    expose: ["9000"]
-    volumes:
-     - wordpress:/var/www/html/wordpress
-    env_file: .env
-    networks:
-        - inception
-
-  nginx:
-    container_name: nginx
-    build: requirements/nginx
-    image: nginx:latest
-    depends_on :
-      - wordpress
+      - "3306:3306"
     networks:
       - inception
+    env_file: .env
+
+  wordpress:
+      container_name: "wordpress"
+      build: ./requirements/wordpress
+      volumes:
+        - wordpress:/var/www/html
+      restart: always
+      expose:
+        - "9000"
+      networks:
+        - inception
+      env_file: .env
+      depends_on:
+        - mariadb
+
+  nginx:
+    container_name: "nginx"
+    build: ./requirements/nginx
+    volumes:
+      - wordpress:/var/www/html
+    restart: always
     ports:
       - "443:443"
-    volumes:
-      - wordpress:/var/www/html/wordpress
-    restart: always
+    networks:
+      - inception
+    env_file: .env
+    depends_on:
+      - wordpress
 
 volumes:
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: bind
+      o: bind
+      device: /home/rvrignon/data/wordpress
 
   mariadb:
     name: mariadb
@@ -59,12 +60,4 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /mnt/nfs/homes/rvrignon/data/mariadb
-
-  wordpress:
-    name: wordpress
-    driver: local
-    driver_opts:
-      type: bind
-      o: bind
-      device: /mnt/nfs/homes/rvrignon/rvrignon/data/wordpress
+      device: /home/rvrignon/data/mariadb

@@ -1,16 +1,16 @@
 FROM debian:buster
 
-# Install MariaDB server and client
-RUN apt-get update && apt-get install -y mariadb-server mariadb-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install -y mariadb-server
 
-# Copy SQL script to container
-COPY conf/database.sql /docker-entrypoint-initdb.d/
+# Configure Mariadb
+RUN mkdir -p /var/run/mysqld
+RUN chown -R mysql:mysql /var/run/mysqld
 
-# Set permissions on SQL script
-RUN chmod 755 /docker-entrypoint-initdb.d/database.sql
+COPY ./conf/my.cnf /etc/mysql/my.cnf
 
-# Expose port 3306 for MySQL connections
+COPY ./conf/script.sh /script.sh
+RUN chmod 755 /script.sh
+
 EXPOSE 3306
 
-# Start MariaDB server
-CMD ["mysqld", "--user=mysql"]
+CMD ["./script.sh"]
