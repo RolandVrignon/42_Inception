@@ -1,17 +1,15 @@
-#Precise with what our image will be built
 FROM debian:buster
 
-#Install nginx with RUN
-RUN apt-get update && apt-get -y install nginx \
-openssl \
-&& rm -rf /var/lib/apt/lists/*
+# Install packages required for Nginx
+RUN apt-get update && apt-get install -y \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
 
-#Generate a self certificate
-RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/ssl/rvrignon.42.fr.pem -keyout /etc/ssl/rvrignon.42.fr.key -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=rvrignon/CN=rvrignon.42.fr"
+# Copy Nginx configuration file
+COPY conf/default.conf /etc/nginx/conf.d/default.conf
 
-#Copy the new configuration inside nginx
-COPY conf/nginx.conf /etc/nginx/conf.d
-
+# Expose port 443 for HTTPS connections
 EXPOSE 443
 
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

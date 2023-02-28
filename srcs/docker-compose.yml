@@ -59,7 +59,7 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/rolexx/data/mariadb
+      device: /mnt/nfs/homes/rvrignon/data/mariadb
 
   wordpress:
     name: wordpress
@@ -67,4 +67,4 @@ volumes:
     driver_opts:
       type: bind
       o: bind
-      device: /home/rolexx/data/wordpress
+      device: /mnt/nfs/homes/rvrignon/rvrignon/data/wordpress
