@@ -16,26 +16,35 @@ else
 mysql_secure_installation << _EOF_
 
 Y
-root4life
-root4life
+$MYSQL_ROOT_PASSWORD
+$MYSQL_ROOT_PASSWORD
 Y
 n
 Y
 Y
 _EOF_
 
-#Add a root user on 127.0.0.1 to allow remote connexion 
-#Flush privileges allow to your sql tables to be updated automatically when you modify it
-#mysql -uroot launch mysql command line client
 echo "GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;" | mysql -uroot
 
 #Create database and user in the database for wordpress
+echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;" | mysql -u root
+echo "CREATE USER '$MYSQL_ADMIN_USER'@'%' IDENTIFIED BY '$MYSQL_ADMIN_PASSWORD';" | mysql -u root
+echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" | mysql -u root
 
-echo "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE; GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; FLUSH PRIVILEGES;" | mysql -u root
+echo "GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_ADMIN_USER'@'%';" | mysql -u root
+echo "GRANT ALL ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';" | mysql -u root
+
+echo "FLUSH PRIVILEGES;" | mysql -u root
 
 #Import database in the mysql command line
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /usr/local/bin/wordpress.sql
 
+# Générer un hachage de mot de passe MD5 pour l'utilisateur $MYSQL_ADMIN_USER
+MYSQL_ADMIN_PASSWORD_HASH=$(mkpasswd -m md5 $MYSQL_ADMIN_PASSWORD)
+MYSQL_PASSWORD_HASH=$(mkpasswd -m md5 $MYSQL_PASSWORD)
+
+# Ajouter les utilisateurs à la base de données WordPress
+echo "INSERT INTO wp_users VALUES (1, '$MYSQL_ADMIN_USER','$MYSQL_ADMIN_PASSWORD_HASH','$MYSQL_ADMIN_USER','$WP_ADMIN_EMAIL','$WP_DOMAIN','2022-09-28 15:59:52','',0,'$MYSQL_ADMIN_USER'), (2, '$MYSQL_USER','$MYSQL_PASSWORD_HASH','$MYSQL_USER','$WP_USER_EMAIL','$WP_DOMAIN','2022-09-28 15:59:52','',0,'$MYSQL_USER');" | mysql -u root $MYSQL_DATABASE
 fi
 
 /etc/init.d/mysql stop

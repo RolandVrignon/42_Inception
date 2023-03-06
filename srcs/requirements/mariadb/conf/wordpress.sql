@@ -388,15 +388,7 @@ CREATE TABLE `wp_users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `wp_users`
---
 
-LOCK TABLES `wp_users` WRITE;
-/*!40000 ALTER TABLE `wp_users` DISABLE KEYS */;
-INSERT INTO `wp_users` VALUES (1,'rvrignon','$P$BFwyV/GXu8rhctqT40E4ozlZ9vAoQg/','rvrignon','rvrignon@gmail.com','https://rvrignon.42.fr','2022-09-28 15:59:52','',0,'rvrignon');
-/*!40000 ALTER TABLE `wp_users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
