@@ -19,10 +19,8 @@ up:
 down:
 	@echo "$(RED)Stopping containers ... $(RESET)"
 	@docker-compose -f $(COMPOSE_FILE) down
-	@-docker stop `docker ps -qa`
-	@-docker rm `docker ps -qa`
 
-clean: 	
+clean: down
 	@echo "$(RED)Deleting all images ... $(RESET)"
 	@-docker rmi -f `docker images -qa`
 	@echo "$(RED)Deleting all volumes ... $(RESET)"
