@@ -1,15 +1,19 @@
-FROM debian:buster
+FROM	debian:buster
 
-RUN apt-get update && apt-get install -y nginx openssl && rm -rf /var/lib/apt/lists/*
+RUN		apt-get update
+RUN		apt-get install -y nginx \
+                openssl
 
-# Create a self-signed SSL certificate for the domain "rvrignon"
-COPY tools/rvrignon.42.fr.crt tools/rvrignon.42.fr.key /etc/nginx/ssl/
+RUN mkdir /etc/nginx/ssl
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+       -out /etc/nginx/ssl/rvrignon.crt \
+       -keyout /etc/nginx/ssl/rvrignon.key \
+       -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=rvrignon/CN=rvrignon/"
 
-# Configure Nginx to use the SSL certificate
-COPY conf/default.conf /etc/nginx/conf.d/default.conf
+COPY ./conf/nginx.conf /etc/nginx/conf.d
 
-# Expose port 443 for HTTPS connections
-EXPOSE 443
+RUN mkdir -p /run/nginx
 
-# Start Nginx
+EXPOSE	443
+
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,63 +1,59 @@
-version: '3.9'
-
-networks:
-  inception:
-    driver: bridge
+version: '3'
 
 services:
-  mariadb:
-    container_name: "mariadb"
-    build: ./requirements/mariadb
-    volumes:
-      - mariadb:/var/lib/mysql
-    restart: always
-    ports:
-      - "3306:3306"
-    networks:
-      - inception
-    env_file: .env
-
-  wordpress:
-      container_name: "wordpress"
-      build: ./requirements/wordpress
-      volumes:
-        - wordpress:/var/www/html
-      restart: always
-      expose:
-        - "9000"
-      networks:
-        - inception
-      env_file: .env
-      depends_on:
-        - mariadb
-
   nginx:
-    container_name: "nginx"
+    container_name: nginx
     build: ./requirements/nginx
-    volumes:
-      - wordpress:/var/www/html
-    restart: always
-    ports:
-      - "443:443"
-    networks:
-      - inception
-    env_file: .env
     depends_on:
       - wordpress
-
-volumes:
-  wordpress:
-    name: wordpress
-    driver: local
-    driver_opts:
-      type: bind
-      o: bind
-      device: /home/rvrignon/data/wordpress
+    ports:
+      - 443:443
+    volumes:
+      - wordpress_data:/var/www/html
+    restart: always
+    networks:
+      - network
 
   mariadb:
-    name: mariadb
+    container_name: mariadb
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - network
+    restart: always
+    env_file:
+      - .env
+
+  wordpress:
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - network
+
+volumes:
+  mariadb_data:
     driver: local
     driver_opts:
-      type: bind
-      o: bind
+      type: none
       device: /home/rvrignon/data/mariadb
+      o: bind
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/rvrignon/data/wordpress
+      o: bind
+
+networks:
+  network:
+    driver: bridge
