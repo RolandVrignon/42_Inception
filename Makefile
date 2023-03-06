@@ -16,26 +16,13 @@ up:
 	@echo "$(GREEN)Building containers in background ... $(RESET)"
 	@docker-compose -f $(COMPOSE_FILE) up -d --build
 
-debug:
-	@echo "$(GREEN)Building files for volumes ... $(RESET)"
-	@sudo mkdir -p /home/rvrignon/data/wordpress
-	@sudo mkdir -p /home/rvrignon/data/mariadb
-	@echo "$(GREEN)Building containers with log information ... $(RESET)"
-	@docker-compose -f $(COMPOSE_FILE) --verbose up
-
-list:	
-	@echo "$(PURPLE)Listing all containers ... $(RESET)"
-	 docker ps -a
-
-list_volumes:
-	@echo "$(PURPLE)Listing volumes ... $(RESET)"
-	docker volume ls
-
-clean: 	
+down:
 	@echo "$(RED)Stopping containers ... $(RESET)"
 	@docker-compose -f $(COMPOSE_FILE) down
 	@-docker stop `docker ps -qa`
 	@-docker rm `docker ps -qa`
+
+clean: 	
 	@echo "$(RED)Deleting all images ... $(RESET)"
 	@-docker rmi -f `docker images -qa`
 	@echo "$(RED)Deleting all volumes ... $(RESET)"
